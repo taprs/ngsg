@@ -1,4 +1,4 @@
-# `ngsg` -- rewrite of `NGSgenotyp2` for Snakemake
+# `ngsg`: rewrite of `NGSgenotyp2` for Snakemake
 
 ## Purpose and motivation
 
@@ -23,7 +23,7 @@ Please refer to the [NGSgenotyp2 README](README_NGSgenotyp.md) for more details 
 
 ## Installation
 
-```console
+```bash
 git clone https://github.com/taprs/ngsg.git
 cd ngsg
 conda env create -n ngsg_env -f environment.yaml
@@ -41,7 +41,7 @@ The input data provided to the pipeline are:
 
 Having the inputs set up, one would run the pipeline as follows:
 
-```console
+```bash
 conda activate ngsg_env
 mkdir ngsg_output
 cd ngsg_output
