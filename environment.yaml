@@ -1,0 +1,20 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.9.6
+  - snakemake
+  - parallel
+  - matplotlib
+  - biopython
+  - scipy
+  - numpy
+  - pysam
+  - ete3
+  - pyyaml
+  - xlrd
+  - xlwt
+  - psutil
+  - ca-certificates
+  - certifi
+  - openssl
