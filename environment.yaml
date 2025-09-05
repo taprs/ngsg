@@ -2,11 +2,19 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - python=3.9.6
+  - python>=3.9.6
   - snakemake
   - parallel
   - matplotlib
   - biopython
+  - bowtie2
+  - samtools
+  - muscle
+  - phyml
+  - spades
+  # - quast
+  # - cap3
+  # - minia
   - scipy
   - numpy
   - pysam
@@ -15,6 +23,3 @@ dependencies:
   - xlrd
   - xlwt
   - psutil
-  - ca-certificates
-  - certifi
-  - openssl

@@ -49,9 +49,10 @@ def assembly(reads_data,assembler,config):
     cur_dir="."
     asm_config=config['ASMtools'][assembler]
     # tools_folder=main_configs['tools_folder']
-    tools_folder = snakemake.params["tools_folder"]
+    # tools_folder = snakemake.params["tools_folder"]
 
-    asm_path=os.path.join(tools_folder,asm_config['path'])
+    # asm_path=os.path.join(tools_folder,asm_config['path'])
+    asm_path=asm_config['path']
     # if os.path.exists(asm_path):
         # c=0
     f=open(snakemake.output[0], "w")

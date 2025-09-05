@@ -63,10 +63,10 @@ def run_bowtie2(readsConfig,alignmentMode,alignmentSensitivity):
             reduced_outstats=os.path.join(aln_path,"{}_samtools_stats_reduced".format(aln_name))
                         
                     # bwt_cmd="{bpath}bowtie2 --phred33 --{alnmode} --{alnsens} -x {RefIndex} {samples} 2>{err_bowtie} | {path}samtools view -S -b {flags} - > {bamFile}".format(bpath=bowtie2_path,path=samtools_path,RefIndex=indexval['index'],samples=samples, err_bowtie=errBWTfile, bamFile=outbam,flags=flags,alnmode=alignmentMode,alnsens=alignmentSensitivity)
-            bwt_cmd="mkdir -p {alnpath} && {bpath}bowtie2 --phred33 --{alnmode} --{alnsens} -x {RefIndex} {samples} 2>{err_bowtie} | {path}samtools view -S -b {flags} - | {path}samtools sort - > {bamFile}".format(
+            bwt_cmd="mkdir -p {alnpath} && bowtie2 --phred33 --{alnmode} --{alnsens} -x {RefIndex} {samples} 2>{err_bowtie} | samtools view -S -b {flags} - | samtools sort - > {bamFile}".format(
                     alnpath=aln_path,
-                    bpath=snakemake.params.bowtie2_path,
-                    path=snakemake.params.samtools_path,
+                    # bpath=snakemake.params.bowtie2_path,
+                    # path=snakemake.params.samtools_path,
                     RefIndex=indexval["index"],
                     samples=samples, 
                     err_bowtie=errBWTfile, 

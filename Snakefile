@@ -18,12 +18,7 @@ readsconfig=os.path.join(config['OutFolders']['configs_fld'],config['readsconfig
 
 fastarefbase=os.path.splitext(os.path.basename(config["fastaref"]))[0]
 
-# configfile: os.path.join(config['OutFolders']['configs_fld'],config['assembly_config'])
-# configfile: config["readsconfig"]
-
 outdir="Assembly_" + config["asmsuffix"] + "/"
-
-# samp= [ k for k in config.keys() if isinstance(config[k], dict) and "reads" in config[k].keys() ]
 
 # Parse sample names from reads file
 samp=[]
@@ -139,10 +134,8 @@ rule index_single_fastas:
   output:
     multiext("Refs/BWT_RefIndexes/{ref}.", 
              "1.bt2", "2.bt2", "3.bt2", "4.bt2", "rev.1.bt2", "rev.2.bt2")
-  params:
-    bowtie2_path=os.path.join(tools_folder, config["bowtie2"]["bin_folder"])
   shell:
-    "{params.bowtie2_path}bowtie2-build {input} Refs/BWT_RefIndexes/{wildcards.ref}"
+    "bowtie2-build {input} Refs/BWT_RefIndexes/{wildcards.ref}"
 
 rule bowtie2_prep:
   input:
@@ -150,8 +143,6 @@ rule bowtie2_prep:
     os.path.join(config['OutFolders']['configs_fld'],config['index_cfg']),
     aggregate_index_single_fastas,
   params:
-    bowtie2_path=os.path.join(tools_folder, config["bowtie2"]["bin_folder"]),
-    samtools_path=os.path.join(tools_folder, config["samtools"]["bin_folder"]),
     pymod=pymod_path
   output:
     "bowtie2_commands.sh",
@@ -164,40 +155,32 @@ rule samtools_index_sorted:
     "{file}_SORTED.bam"
   output:
     "{file}_SORTED.bam.bai"
-  params:
-    samtools_path=os.path.join(tools_folder, config["samtools"]["bin_folder"])
   shell:
-    "{params.samtools_path}samtools index {input}"
+    "samtools index {input}"
 
 rule samtools_index_reduced:
   input:
     "{file}_reduced.bam"
   output:
     "{file}_reduced.bam.bai"
-  params:
-    samtools_path=os.path.join(tools_folder, config["samtools"]["bin_folder"])
   shell:
-    "{params.samtools_path}samtools index {input}"
+    "samtools index {input}"
 
 rule samtools_stats_sorted:
   input:
     multiext("{file}_SORTED", ".bam", ".bam.bai")
   output:
     "{file}_samtools_stats",
-  params:
-    samtools_path=os.path.join(tools_folder, config["samtools"]["bin_folder"])
   shell:
-    "{params.samtools_path}samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
+    "samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
 
 rule samtools_stats:
   input:
     multiext("{file}_reduced", ".bam", ".bam.bai")
   output:
     "{file}_samtools_stats_reduced",
-  params:
-    samtools_path=os.path.join(tools_folder, config["samtools"]["bin_folder"])
   shell:
-    "{params.samtools_path}samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
+    "samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
 
 rule filter_bam:
   input:
@@ -214,10 +197,8 @@ rule samtools_depth_reduced:
     "{file}_reduced.bam.bai"
   output:
     "{file}_reduced.bam.depth"
-  params:
-    samtools_path=os.path.join(tools_folder, config["samtools"]["bin_folder"])
   shell:
-    "{params.samtools_path}samtools depth {input[0]} | cut -f2- > {output}"
+    "samtools depth {input[0]} | cut -f2- > {output}"
 
 rule samtools_depth_sorted:
   input:
@@ -225,10 +206,8 @@ rule samtools_depth_sorted:
     "{file}_SORTED.bam.bai"
   output:
     "{file}_SORTED.bam.depth"
-  params:
-    samtools_path=os.path.join(tools_folder, config["samtools"]["bin_folder"])
   shell:
-    "{params.samtools_path}samtools depth {input[0]} | cut -f2- > {output}"
+    "samtools depth {input[0]} | cut -f2- > {output}"
 
 def aggregate_bowtie2_run(wildcards):
   chk_output = checkpoints.bowtie2_run.get(**wildcards).output[0]
@@ -310,7 +289,6 @@ rule assembly_prep:
     outdir + "refs/" + fastarefbase + "_phylo.fasta",
   params:
     pymod=pymod_path,
-    tools_folder = tools_folder
   script:
     "scripts/assembly_prep.py"
 
@@ -319,11 +297,6 @@ rule assembly_run:
     outdir + "assembly_commands.sh",
     outdir + "refs/" + fastarefbase + ".pk.fasta",
     aggregate_kmer_filter_run
-    # [ x 
-    #   for _,i in config.items() 
-    #     if isinstance(config[_], dict) and "reads" in config[_].keys() 
-    #       for x in i["reads"] 
-    #         ]
   output:
     expand(outdir + "{sample}/contigs.fa", sample=samp) 
   params:
@@ -348,17 +321,15 @@ rule do_yass:
   output:
     outdir + "{sample}/yass_stdout"
   params:
-    yass_path=os.path.join(tools_folder, config["yass"]["bin_folder"]),
     yass_params=config["YASSstep"]["yass_params"]
   shell:
-    "{params.yass_path}yass -d 2 {params.yass_params} {input[0]} {input[1]} > {output[0]}"
+    "yass -d 2 {params.yass_params} {input[0]} {input[1]} > {output[0]}"
 
 rule parse_yass:
   input:
     outdir + "{sample}/yass_stdout",
     outdir + "{sample}/cleaned_contigs.fa",
     outdir + "asm_contigs.pk",
-    # config["ref"],
     "Refs/" + fastarefbase + ".pk",
   output:
     outdir + "{sample}/yass_oriented_contigs.fa",
@@ -391,10 +362,8 @@ rule do_muscle:
     "{prefix}/phylo_all_{postfix}.fa",
   output:
     "{prefix}/MUSCLE_phylo_all_{postfix}.fa",
-  params:
-    muscle_path=os.path.join(tools_folder, config["muscle"]["bin_folder"]),
   shell:
-    "{params.muscle_path}muscle -in {input} -out {output}"
+    "muscle -in {input} -out {output}"
 
 rule fasta2phylip:
   input:
@@ -410,10 +379,8 @@ rule do_phyml:
   output:
     "{prefix}/PHYLIP_{postfix}.phylip_phyml_stats.txt",
     "{prefix}/PHYLIP_{postfix}.phylip_phyml_tree.txt",
-  params:
-    phyml_path=os.path.join(tools_folder, config["phyml"]["bin_folder"]),
   shell:
-    "{params.phyml_path}phyml --quiet --no_memory_check -i {input} -d nt"
+    "phyml --quiet --no_memory_check -i {input} -d nt"
 
 rule draw_trees_samples:
   input:

@@ -24,6 +24,8 @@ Please refer to the [NGSgenotyp2 README](README_NGSgenotyp.md) for more details 
 
 ## Installation
 
+Dependencies are listed in `environment.yaml`; optional ones are commented out.
+
 ```bash
 git clone https://github.com/taprs/ngsg.git
 cd ngsg
