@@ -6,7 +6,7 @@ import sys
 os.environ["LD_LIBRARY_PATH"] = os.environ["CONDA_PREFIX"] + "/lib:" + ( os.environ["LD_LIBRARY_PATH"] if "LD_LIBRARY_PATH" in os.environ.keys() else "" )
 
 # Supply configfile via --configfile or uncomment the line below
-# configfile: "/netscratch/dep_mercier/grp_novikova/software/ngsg/configs/ngsg.yaml"
+configfile: workflow.basedir + "/config.yaml"
 
 # Snakefile must stay in the ngsg folder!
 
@@ -14,11 +14,7 @@ App_Folder = workflow.basedir
 Features_Path = os.path.join(App_Folder,"features/")
 pymod_path = os.path.join(App_Folder,"pymod/")
 tools_folder=os.path.join(App_Folder,'tools')
-configs_folder=os.path.join(App_Folder,"configs")
-tools_config=os.path.join(configs_folder,"tools_config.yaml")
 readsconfig=os.path.join(config['OutFolders']['configs_fld'],config['readsconfig'])
-
-configfile: tools_config
 
 fastarefbase=os.path.splitext(os.path.basename(config["fastaref"]))[0]
 
