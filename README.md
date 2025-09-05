@@ -15,9 +15,10 @@ The great and long-established [NGSgenotyp2 pipeline](https://github.com/mathieu
 - is easier to install and run,
 - is faster due to smart job scheduling,
 - is easier to maintain due to smaller codebase,
-- tries to make use of the newer/updated tools.
+- tries to make use of the newer/updated tools,
+- tries to be more intuitive.
 
-As a result, it is more straighforward to apply `ngsg` for genotyping other "difficult" genomic loci.
+As a result, it is more straighforward to apply `ngsg` for genotyping other "difficult" regions beyond the S-locus.
 
 Please refer to the [NGSgenotyp2 README](README_NGSgenotyp.md) for more details on the internals of the pipeline.
 
@@ -39,7 +40,7 @@ The input data provided to the pipeline are:
 
 (Structure of input files is described in detail in the [NGSgenotyp2 README](README_NGSgenotyp.md).)
 
-Having the inputs set up, one would run the pipeline as follows:
+Having the inputs set up, the easiest way to run the pipeline is as follows:
 
 ```bash
 conda activate ngsg_env
@@ -49,3 +50,5 @@ snakemake --cores <n_cores> -s /path/to/ngsg/Snakefile -R haploasm --config read
 ```
 
 Remove `-R haploasm` if only mapping and genotyping (as in `NGSgenotyp genotyp`) is required. 
+
+A more involved way is to copy and modify `config.yaml` and replace the `--config` part with `--configfile /path/to/new_config.yaml`. 
