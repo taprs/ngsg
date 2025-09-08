@@ -1,3 +1,8 @@
+# Snakemake-related folders
+.snakemake/
+demo_datas/demo_results
+demo_datas/*.bt2
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

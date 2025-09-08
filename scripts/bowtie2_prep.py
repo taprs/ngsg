@@ -13,7 +13,8 @@ import load_dump as ld
 def run_bowtie2(readsConfig,alignmentMode,alignmentSensitivity):
     # addTextToLogFile("-- ALIGNMENTS WITH BOWTIE2 --")
     # index_dic=ld.yaml_loadDic(yaml_index)
-    index_dic=ld.yaml_loadDic(snakemake.input[1])
+    # index_dic=ld.yaml_loadDic(snakemake.input[1])
+    index_dic={"ref": {"index": snakemake.config["fastaref"]}}
     aln_name_template="Aln_{refID}_VS_{sample}"
     align_outdic={}
     errBWTfile_list=[]
@@ -59,12 +60,15 @@ def run_bowtie2(readsConfig,alignmentMode,alignmentSensitivity):
             outbam_sorted=os.path.join(aln_path,"{}_SORTED.bam".format(aln_name))
             outbam_index=os.path.join(aln_path,"{}_SORTED.bam.bai".format(aln_name))
             mapped_unmapped_out = os.path.join(aln_path, "mapped_{}".format(aln_name))
-            outstats=os.path.join(aln_path,"{}_samtools_stats".format(aln_name))
-            reduced_outstats=os.path.join(aln_path,"{}_samtools_stats_reduced".format(aln_name))
+            outstats=os.path.join(aln_path,"{}_SORTED_stats".format(aln_name))
+            reduced_outstats=os.path.join(aln_path,"{}_reduced_stats".format(aln_name))
+            # outstats=os.path.join(aln_path,"{}_samtools_stats".format(aln_name))
+            # reduced_outstats=os.path.join(aln_path,"{}_samtools_stats_reduced".format(aln_name))
                         
                     # bwt_cmd="{bpath}bowtie2 --phred33 --{alnmode} --{alnsens} -x {RefIndex} {samples} 2>{err_bowtie} | {path}samtools view -S -b {flags} - > {bamFile}".format(bpath=bowtie2_path,path=samtools_path,RefIndex=indexval['index'],samples=samples, err_bowtie=errBWTfile, bamFile=outbam,flags=flags,alnmode=alignmentMode,alnsens=alignmentSensitivity)
-            bwt_cmd="mkdir -p {alnpath} && bowtie2 --phred33 --{alnmode} --{alnsens} -x {RefIndex} {samples} 2>{err_bowtie} | samtools view -S -b {flags} - | samtools sort - > {bamFile}".format(
+            bwt_cmd="mkdir -p {alnpath} && bowtie2 -a -p {threads} --phred33 --{alnmode} --{alnsens} -x {RefIndex} {samples} 2>{err_bowtie} | samtools view -S -b {flags} - | samtools sort - > {bamFile}".format(
                     alnpath=aln_path,
+                    threads=snakemake.params["threads"],
                     # bpath=snakemake.params.bowtie2_path,
                     # path=snakemake.params.samtools_path,
                     RefIndex=indexval["index"],

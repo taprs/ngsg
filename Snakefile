@@ -77,7 +77,7 @@ checkpoint kmer_filter_run:
     directory("FQ_filtered"),
     directory("FQ_splited"),
     directory("FQ_filtered/need_split")
-  threads: workflow.cores * 0.75
+  threads: 20
   shell:
     "mkdir -p {output} && parallel -j {threads} -a {input}"
 
@@ -99,25 +99,7 @@ rule parse_reference_db:
     "Refs/" + fastarefbase + ".pk"
   script:
     "scripts/parse_reference_db.py"
-    
-checkpoint write_single_fastas:
-  input:
-    "Refs/" + fastarefbase + ".pk" 
-  output: 
-    directory("Refs/Single_Fastas"), 
-    os.path.join(config['OutFolders']['configs_fld'],config['index_cfg'])
-  params:
-    pymod=pymod_path
-  script:
-    "scripts/write_single_fastas.py"
-
-def aggregate_index_single_fastas(wildcards):
-  chk_output = checkpoints.write_single_fastas.get(**wildcards).output[0]
-  file_names = expand("Refs/BWT_RefIndexes/{ref}.{ext}.bt2",
-                      ref=glob_wildcards(os.path.join(chk_output, "{ref}.fa")).ref,
-                      ext=["1","2","3","4","rev.1","rev.2"])
-  return file_names
-
+ 
 def aggregate_kmer_filter_run(wildcards):
   chk_output = checkpoints.kmer_filter_run.get(**wildcards).output
   file_names = expand("FQ_splited/{sample}_R{ind}_splited.fastq",
@@ -128,22 +110,23 @@ def aggregate_kmer_filter_run(wildcards):
                       ind = ["1", "2"])
   return file_names
 
-rule index_single_fastas:
+rule index_ref:
   input:
-    "Refs/Single_Fastas/{ref}.fa"
+    config["fastaref"]
   output:
-    multiext("Refs/BWT_RefIndexes/{ref}.", 
-             "1.bt2", "2.bt2", "3.bt2", "4.bt2", "rev.1.bt2", "rev.2.bt2")
+    multiext(config["fastaref"]+".", "1.bt2", "2.bt2", "3.bt2", "4.bt2", "rev.1.bt2", "rev.2.bt2")
   shell:
-    "bowtie2-build {input} Refs/BWT_RefIndexes/{wildcards.ref}"
+    "bowtie2-build {input} {input}"
 
 rule bowtie2_prep:
   input:
     "readsConfig_filt.pk",
-    os.path.join(config['OutFolders']['configs_fld'],config['index_cfg']),
-    aggregate_index_single_fastas,
+    # os.path.join(config['OutFolders']['configs_fld'],config['index_cfg']),
+    multiext(config["fastaref"]+".", "1.bt2", "2.bt2", "3.bt2", "4.bt2", "rev.1.bt2", "rev.2.bt2")
+    # aggregate_index_single_fastas,
   params:
-    pymod=pymod_path
+    pymod=pymod_path,
+    threads=int(workflow.cores / len(samp))+1
   output:
     "bowtie2_commands.sh",
     "Results/align.pk",
@@ -166,21 +149,32 @@ rule samtools_index_reduced:
   shell:
     "samtools index {input}"
 
-rule samtools_stats_sorted:
-  input:
-    multiext("{file}_SORTED", ".bam", ".bam.bai")
-  output:
-    "{file}_samtools_stats",
-  shell:
-    "samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
+# rule samtools_stats_sorted:
+#   input:
+#     multiext("{file}_SORTED", ".bam", ".bam.bai")
+#   output:
+#     "{file}_samtools_stats",
+#   shell:
+#     "samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
+#
+# rule samtools_stats:
+#   input:
+#     multiext("{file}_reduced", ".bam", ".bam.bai")
+#   output:
+#     "{file}_samtools_stats_reduced",
+#   shell:
+#     "samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
 
-rule samtools_stats:
+rule stats:
   input:
-    multiext("{file}_reduced", ".bam", ".bam.bai")
+    multiext("{file}", ".bam", ".bam.bai")
   output:
-    "{file}_samtools_stats_reduced",
+    "{file}_stats",
+  wildcard_constraints:
+    file = ".*_(SORTED|reduced)",
   shell:
-    "samtools stats {input[0]} | grep ^SN | cut -f2-3 > {output}"
+    "csvtk -t join --na 0 -L <( samtools bedcov -d 1 <( samtools idxstats {input[0]} | sed 's/\t/\t1\t/' | head -n -1 ) {input[0]} ) <( samtools view --keep-tag NM {input[0]} | sed 's/NM:i://' | csvtk -t summary -H -g 3 -f 12:sum ) > {output}"
+
 
 rule filter_bam:
   input:
@@ -198,7 +192,7 @@ rule samtools_depth_reduced:
   output:
     "{file}_reduced.bam.depth"
   shell:
-    "samtools depth {input[0]} | cut -f2- > {output}"
+    "samtools depth {input[0]} > {output}"
 
 rule samtools_depth_sorted:
   input:
@@ -207,7 +201,7 @@ rule samtools_depth_sorted:
   output:
     "{file}_SORTED.bam.depth"
   shell:
-    "samtools depth {input[0]} | cut -f2- > {output}"
+    "samtools depth {input[0]} > {output}"
 
 def aggregate_bowtie2_run(wildcards):
   chk_output = checkpoints.bowtie2_run.get(**wildcards).output[0]
@@ -215,8 +209,9 @@ def aggregate_bowtie2_run(wildcards):
     "BWT_Results/{pat}{ext}",
     pat = glob_wildcards(os.path.join(chk_output, "{pat}_SORTED.bam")).pat,
     ext=[
-      "_reduced.bam.depth", "_SORTED.bam.depth", 
-      "_samtools_stats", "_samtools_stats_reduced"
+      "_SORTED_stats", "_reduced_stats"
+      # "_reduced.bam.depth", "_SORTED.bam.depth", 
+      # "_samtools_stats", "_samtools_stats_reduced"
     ])
   return file_names
 

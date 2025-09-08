@@ -7,8 +7,8 @@
 # Most important ones are here:
 MaxParallelsJobs: 20
 outfolder: ngsg
-readsinfo: /netscratch/dep_mercier/grp_novikova/software/ngsg/demo_datas/reads_list_reduced
-fastaref: /netscratch/dep_mercier/grp_novikova/software/ngsg/demo_datas/Ahalleri_SRK_Database.fa
+readsinfo: ../reads_list_reduced
+fastaref: ../Ahalleri_SRK_Database.fa
 
 # Here come other former CLI arguments:
 
