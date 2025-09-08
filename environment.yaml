@@ -9,7 +9,7 @@ dependencies:
   - biopython
   - bowtie2
   - samtools
-  - muscle
+  - muscle=3.8
   - phyml
   - spades
   # - quast
