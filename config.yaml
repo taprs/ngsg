@@ -23,7 +23,7 @@ statsmismatchthrld: False
 keepindel: False
 readsMappedThrld: 10
 alignmentMode: end-to-end
-alignmentSensitivity: very-sensitive
+alignmentSensitivity: sensitive
 refexclude: null
 outnbsheetperxls: 15
 
