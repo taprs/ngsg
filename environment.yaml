@@ -12,6 +12,7 @@ dependencies:
   - muscle=3.8
   - phyml
   - spades
+  - csvtk
   # - quast
   # - cap3
   # - minia

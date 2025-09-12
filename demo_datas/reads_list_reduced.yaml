@@ -1,0 +1,13 @@
+reads:
+  DRS032518:
+    interleaved:
+      - ../raw_fastq/DRR031891_reduced.fastq.gz
+      - ../raw_fastq/DRR031892_reduced.fastq.gz
+  DRS032528:
+    interleaved:
+      - ../raw_fastq/DRR031908_reduced_R1.fastq.gz
+      - ../raw_fastq/DRR031908_reduced_R2.fastq.gz
+  DRS032540:
+    interleaved:
+      - ../raw_fastq/DRR031927_reduced.fastq.gz
+      - ../raw_fastq/DRR031926_reduced.fastq.gz

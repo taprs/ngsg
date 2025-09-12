@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import yaml
 
 #link conda libraries
 os.environ["LD_LIBRARY_PATH"] = os.environ["CONDA_PREFIX"] + "/lib:" + ( os.environ["LD_LIBRARY_PATH"] if "LD_LIBRARY_PATH" in os.environ.keys() else "" )
@@ -27,6 +28,9 @@ with open(config["readsinfo"], "r") as f:
     if (i==0):
       continue
     samp.append(l.split(",")[0])
+
+with open("config_dump.yaml", "w") as f:
+  yaml.dump(config, f)
 
 ### genotyp
 
@@ -173,7 +177,7 @@ rule stats:
   wildcard_constraints:
     file = ".*_(SORTED|reduced)",
   shell:
-    "csvtk -t join --na 0 -L <( samtools bedcov -d 1 <( samtools idxstats {input[0]} | sed 's/\t/\t1\t/' | head -n -1 ) {input[0]} ) <( samtools view --keep-tag NM {input[0]} | sed 's/NM:i://' | csvtk -t summary -H -g 3 -f 12:sum ) > {output}"
+    "csvtk -t join --na 0 -L <( samtools bedcov -g SECONDARY -d 1 <( samtools idxstats {input[0]} | sed 's/\t/\t1\t/' | head -n -1 ) {input[0]} ) <( samtools view --keep-tag NM {input[0]} | sed 's/NM:i://' | csvtk -t summary -H -g 3 -f 12:sum ) > {output}"
 
 
 rule filter_bam:
@@ -245,11 +249,12 @@ rule write_results:
     "Refs/" + fastarefbase + ".pk",
     readsconfig
   output:
-    "Results/xls_samples_index.txt",
-    "Results/putative_alleles.txt",
-    "Results/putative_groups.txt",
-    "Results/samtools_stats.yaml",
-    "configs/asm_config.yaml"
+    tsv = "Results/Genotyp_output_ngsg.tsv",
+    asm = "configs/asm_config.yaml",
+    sam = "Results/samtools_stats.yaml",
+    idx = "Results/xls_samples_index.txt",
+    all = "Results/putative_alleles.txt",
+    grp = "Results/putative_groups.txt",
   params:
     pymod = pymod_path,
   script:

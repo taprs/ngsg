@@ -142,7 +142,7 @@ def parse_stats_file(stats_file, reduced=False):
                 filestats[_[0]][suffix]["reads mapped"]=float(_[3])
                 filestats[_[0]][suffix]["bases mapped"]=float(_[5])
                 filestats[_[0]][suffix]["covered_pos"]=float(_[6])
-                filestats[_[0]][suffix]["mismatches"]=float(_[7])
+                filestats[_[0]][suffix]["mismatches"]=( float(_[7]) if len(_)==8 else 0 )
             # if filestats['bases mapped']>0:
                 if filestats[_[0]][suffix]['bases mapped']>0:
                     filestats[_[0]][suffix]["error rate"]=filestats[_[0]][suffix]['mismatches']/filestats[_[0]][suffix]['bases mapped']
