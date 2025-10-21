@@ -112,7 +112,7 @@ YASSstep:
 ASMtools:
   spades:
     # cmdline: "-t {thrds} --careful -k {kmerS} -o . {fastq} > {logf}"
-    cmdline: "-t {thrds} --careful -k {kmerS} -o {outf} {fastq} > {logf}"
+    cmdline: "-t {thrds} --careful -k {kmerS} -o {outf} {fastq} > {logf} || echo $'>\\nNNNNNNNNNNNN' > {outf}"
     options:
       fwd: "--pe1-1 "
       rev: "--pe1-2 "
