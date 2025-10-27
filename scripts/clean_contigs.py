@@ -15,7 +15,7 @@ def clean_contigs_file(asm_contigs):
                 with open(cleaned_contigs,'w') as outcontigs:
                     for rec in fasta:
                         # if len(rec.seq)>=args.contigminlen and (not args.contigmaxlen or len(rec.seq)<=contigmaxlen):
-                        if len(rec.seq)>=snakemake.config["contigminlen"] and (not snakemake.config["contigmaxlen"] or len(rec.seq)<=snakemake.config["contigmaxlen"]):
+                        if rec.seq=="NNNNNNNNNNNN" or (len(rec.seq)>=snakemake.config["contigminlen"] and (not snakemake.config["contigmaxlen"] or len(rec.seq)<=snakemake.config["contigmaxlen"])):
                             outcontigs.write(rec.format('fasta'))
     return out_asm_contigs
 
