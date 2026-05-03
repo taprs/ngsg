@@ -1,6 +1,6 @@
 import os
-import pickle
 import re
+import sys
 from Bio import SeqIO
 
 sys.path.insert(0, snakemake.params["pymod"])
@@ -14,10 +14,14 @@ def parse_contigs_infos(asm_contigs,assembler):
         out_infos[sample]={}
         contigs_file=datas['contigs']
         fasta=SeqIO.parse(contigs_file,'fasta')
-        for rec in fasta:
+        for idx,rec in enumerate(fasta, start=1):
             seq_id=str(rec.description)
             COV_rslt=re.search(cov_regex,seq_id)
-            contig_nbr=re.search(contig_nbr_regex,seq_id).group(0)
+            contig_nbr_match=re.search(contig_nbr_regex,seq_id)
+            if contig_nbr_match is not None:
+                contig_nbr=contig_nbr_match.group(0)
+            else:
+                contig_nbr=seq_id.strip() if seq_id.strip() else f"contig_{idx}"
             if COV_rslt is not None:
                 cov_val=float(COV_rslt.group(0)) 
             else:
@@ -61,10 +65,17 @@ def parse_yass_stdout(yass_stdout,assembler):
     fields=['Query_id','Subject_id', 'percent_identity', 'alignment_length', 'mismatches', 'gap_openings', 'q_start', 'q_end', 's_start', 's_end', 'e-value', 'bit_score']
     contig_nbr_regex=config['ASMtools'][assembler]['regex_contig_nbr']
     with open(yass_stdout,'r') as yassfile:
-        for line in yassfile:
+        for idx,line in enumerate(yassfile, start=1):
             if not line.startswith("#"):
                 tmp=line.strip().split('\t')
-                tmp[0]=re.search(contig_nbr_regex,tmp[0]).group(0)
+                query_id=tmp[0].strip()
+                contig_nbr_match=re.search(contig_nbr_regex,query_id)
+                if contig_nbr_match is not None:
+                    tmp[0]=contig_nbr_match.group(0)
+                elif query_id:
+                    tmp[0]=query_id
+                else:
+                    tmp[0]=f"contig_{idx}"
                 out_rslt.append({fields[i]:string_to_number(val) for i,val in enumerate(tmp)})
     return out_rslt
 
@@ -139,8 +150,7 @@ def reverse_complement(seq):
 reference_dic = ld.pickle_loadDic(snakemake.input[3])
 
 config=snakemake.config
-with open(snakemake.input[2], 'rb') as f:
-    asm_contigs=pickle.load(f)
+asm_contigs = ld.yaml_loadDic(snakemake.input[2])
 
 contigs_infos=parse_contigs_infos(asm_contigs,snakemake.config["assembler"])
 raw_yass_file=parse_yass_results(contigs_infos,reference_dic,snakemake.config["assembler"])

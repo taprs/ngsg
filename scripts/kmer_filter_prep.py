@@ -10,7 +10,6 @@ Takes one entry from the reads list and applies kmer filter from a premade pickl
 
 import sys
 import os
-import pickle
 
 sys.path.insert(0, snakemake.params["pymod"])
 import load_dump as ld
@@ -37,8 +36,7 @@ def get_split_reads(infile,idx):
     bnameInfile=os.path.basename(infile)
     return os.path.join(outFQsplited,"{}_R{}_splited{}".format(bnameInfile[:bnameInfile.rfind('.')],idx,filesuffix))
 
-with open(snakemake.input[0], 'rb') as file:
-    readsConfig = pickle.load(file)
+readsConfig = ld.yaml_loadDic(snakemake.input[0])
 
 outFQfiltered=snakemake.config["OutFolders"]["out_filtered"] + "/need_split"
 outFQsplited=snakemake.config['OutFolders']['out_splited']
@@ -145,8 +143,4 @@ f.close()
 print(" -- END kmerRefFilter --",file=sys.stdout)
 
 # return readsConfig
-with open(snakemake.output[1], 'wb') as f:
-    pickle.dump(readsConfig,f)
-
-ld.yaml_dumpDic(snakemake.output[2],readsConfig)
-
+ld.yaml_dumpDic(snakemake.output[1], readsConfig)

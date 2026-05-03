@@ -1,6 +1,5 @@
 import sys
 import os
-import pickle
 
 sys.path.insert(0, snakemake.params["pymod"])
 import load_dump as ld
@@ -145,5 +144,4 @@ write_reference_fasta(ref_fasta,phylo_ref,reference_dic,add_paralogs=snakemake.c
 # asm_contigs=assembly(reads_data,snakemake.config["assembler"],config,main_configs)
 asm_contigs=assembly(reads_data,snakemake.config["assembler"],config)
 
-with open(snakemake.output[1], "wb") as f:
-    pickle.dump(asm_contigs,f)
+ld.yaml_dumpDic(snakemake.output[1], asm_contigs)

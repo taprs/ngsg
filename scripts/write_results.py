@@ -1,6 +1,5 @@
 import sys
 import os
-import pickle
 
 sys.path.insert(0, snakemake.params["pymod"])
 import genotyp_output as go
@@ -50,10 +49,8 @@ def write_tsv_output(outfile,results_folder,outstats,reads_nbr,pk_refdatabase,mi
 config=snakemake.config
 config["MaxSheetNbr"] = ( config["outnbsheetperxls"] if config["outnbsheetperxls"]>=1 else 1 )
 
-with open(snakemake.input[0], 'rb') as f:
-    combined_stats=pickle.load(f)
-with open(snakemake.input[1], 'rb') as f:
-    reads_nbr=pickle.load(f)
+combined_stats=ld.yaml_loadDic(snakemake.input[0])
+reads_nbr=ld.yaml_loadDic(snakemake.input[1])
 pk_refdatabase=snakemake.input[2]
 
 go.write_xls_output(
@@ -84,4 +81,3 @@ go.write_genotypTXT(
 
 samtools_stats=save_stats(combined_stats)
 assembly_config_file(pk_refdatabase)
-

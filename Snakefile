@@ -54,14 +54,13 @@ rule kmer_filter_index:
 
 rule kmer_filter_prep:
   input:
-    "readsConfig.pk",
+    "configs/readsConfig_raw.yaml",
     "Refs/KRFDB_" + fastarefbase + "_k" + str(config["kmerSize"]) + ".pk"
   params:
     kmerrefilter_path=os.path.join(tools_folder, config["kmerRefFilter"]["bin_folder"]),
     pymod=pymod_path
   output:
     "kmerRefFilter_commands.sh",
-    "readsConfig_filt.pk",
     readsconfig
   script:
     "scripts/kmer_filter_prep.py"
@@ -69,8 +68,10 @@ rule kmer_filter_prep:
 rule parse_readsinfo:
   input:
     config["readsinfo"]
+  params:
+    pymod=pymod_path
   output:
-    "readsConfig.pk"
+    "configs/readsConfig_raw.yaml"
   script:
     "scripts/parse_readsinfo.py"
 
@@ -142,7 +143,7 @@ def aggregate_index_single_fastas(wildcards):
 
 rule bowtie2_prep:
   input:
-    "readsConfig_filt.pk",
+    readsconfig,
     os.path.join(config['OutFolders']['configs_fld'],config['index_cfg']),
     # multiext(config["fastaref"]+".", "1.bt2", "2.bt2", "3.bt2", "4.bt2", "rev.1.bt2", "rev.2.bt2")
     aggregate_index_single_fastas,
@@ -151,7 +152,7 @@ rule bowtie2_prep:
     # threads=int(workflow.cores / len(samp))+1
   output:
     "bowtie2_commands.sh",
-    "Results/align.pk",
+    "Results/align.yaml",
   script:
     "scripts/bowtie2_prep.py"
 
@@ -218,12 +219,12 @@ def aggregate_bowtie2_map(wildcards):
 
 rule alignments_stats:
   input:
-    "Results/align.pk",
+    "Results/align.yaml",
     "Refs/" + fastarefbase + ".pk",
     aggregate_bowtie2_run,
   output:
-    "Results/align_stats.pk",
-    "Results/reads_nbr.pk",
+    "Results/align_stats.yaml",
+    "Results/reads_nbr.yaml",
   params:
     pymod = pymod_path,
   script:
@@ -231,8 +232,8 @@ rule alignments_stats:
 
 rule write_results:
   input:
-    "Results/align_stats.pk",
-    "Results/reads_nbr.pk",
+    "Results/align_stats.yaml",
+    "Results/reads_nbr.yaml",
     "Refs/" + fastarefbase + ".pk",
     readsconfig
   output:
@@ -271,7 +272,7 @@ rule assembly_prep:
     readsconfig,
   output:
     outdir + "assembly_commands.sh",
-    outdir + "asm_contigs.pk",
+    outdir + "asm_contigs.yaml",
     outdir + "refs/" + fastarefbase + ".pk.fasta",
     outdir + "refs/" + fastarefbase + "_phylo.fasta",
   params:
@@ -293,10 +294,12 @@ rule assembly_run:
 
 rule clean_contigs:
   input:
-    outdir + "asm_contigs.pk",
+    outdir + "asm_contigs.yaml",
     expand(outdir + "{sample}/contigs.fa", sample=samp) 
+  params:
+    pymod=pymod_path
   output:
-    outdir + "asm_contigs_clean.pk",
+    outdir + "asm_contigs_clean.yaml",
     expand(outdir + "{sample}/cleaned_contigs.fa", sample=samp) 
   script:
     "scripts/clean_contigs.py"
@@ -316,7 +319,7 @@ rule parse_yass:
   input:
     outdir + "{sample}/yass_stdout",
     outdir + "{sample}/cleaned_contigs.fa",
-    outdir + "asm_contigs.pk",
+    outdir + "asm_contigs_clean.yaml",
     "Refs/" + fastarefbase + ".pk",
   output:
     outdir + "{sample}/yass_oriented_contigs.fa",
@@ -400,4 +403,3 @@ rule join_node_lists:
     outdir + "contigs_closest_alleles.txt"
   shell:
     "echo $'#Contigs closest Alleles\n#\tContig\tAllele\tdistance\n' > {output}; cat {input} >> {output}"
-

@@ -1,6 +1,8 @@
-import sys
 import os
-import pickle
+import sys
+
+sys.path.insert(0, snakemake.params["pymod"])
+import load_dump as ld
 
 def get_paired_reads_from_list(reads_list):
     PairedList=[]
@@ -85,5 +87,4 @@ def convert_value(value,vtype):
 
 readsConfig = load_readsList(snakemake.input[0])
 
-with open(snakemake.output[0],'wb') as file:
-    pickle.dump(readsConfig,file,protocol=pickle.HIGHEST_PROTOCOL)
+ld.yaml_dumpDic(snakemake.output[0], readsConfig)

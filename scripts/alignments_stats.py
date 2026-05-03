@@ -151,8 +151,7 @@ def get_reads_nbr(stderr_file):
 
 
 
-with open(snakemake.input[0], 'rb') as f:
-    bwt_results = pickle.load(f)
+bwt_results = ld.yaml_loadDic(snakemake.input[0])
 
 config=snakemake.config
 
@@ -165,7 +164,5 @@ cg.determine_genotypes(combined_stats,snakemake.input[1],
                        snakemake.config['genotyp_alleleProb_THRLD'])
 gd.normalize_depth(combined_stats,snakemake.input[1])
 
-with open(snakemake.output[0], 'wb') as f:
-    pickle.dump(combined_stats,f)
-with open(snakemake.output[1], 'wb') as f:
-    pickle.dump(reads_nbr,f)
+ld.yaml_dumpDic(snakemake.output[0], combined_stats)
+ld.yaml_dumpDic(snakemake.output[1], reads_nbr)

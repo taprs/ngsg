@@ -3,7 +3,6 @@
 
 import os
 import sys
-import pickle
 
 sys.path.insert(0, snakemake.params["pymod"])
 import load_dump as ld
@@ -146,8 +145,7 @@ def run_bowtie2(readsConfig,alignmentMode,alignmentSensitivity):
 #                 
 #     launch_samtools_stats(list_stats_reduced)
 #     
-    with open(snakemake.output[1], 'wb') as f:
-        pickle.dump(align_outdic, f)
+    ld.yaml_dumpDic(snakemake.output[1], align_outdic)
     # with open(snakemake.output[2], 'wb') as f:
     #     pickle.dump(reads_nbr, f)
     # return align_outdic,reads_nbr
@@ -236,8 +234,7 @@ def run_bowtie2(readsConfig,alignmentMode,alignmentSensitivity):
 #     if args.tinyverbose:
 #         wait_progressbar_finished(t1)
 #     
-with open(snakemake.input[0], 'rb') as file:
-    readsConfig = pickle.load(file)
+readsConfig = ld.yaml_loadDic(snakemake.input[0])
 
 config=snakemake.config
 

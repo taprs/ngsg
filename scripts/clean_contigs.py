@@ -1,6 +1,9 @@
 import os
 from Bio import SeqIO
-import pickle
+import sys
+
+sys.path.insert(0, snakemake.params["pymod"])
+import load_dump as ld
 
 def clean_contigs_file(asm_contigs):
     out_asm_contigs={}
@@ -19,10 +22,8 @@ def clean_contigs_file(asm_contigs):
                             outcontigs.write(rec.format('fasta'))
     return out_asm_contigs
 
-with open(snakemake.input[0], "rb") as f:
-    asm_contigs=pickle.load(f)
+asm_contigs = ld.yaml_loadDic(snakemake.input[0])
 
 out_asm_contigs = clean_contigs_file(asm_contigs)
 
-with open(snakemake.output[0], "wb") as f:
-    pickle.dump(out_asm_contigs, f)
+ld.yaml_dumpDic(snakemake.output[0], out_asm_contigs)
